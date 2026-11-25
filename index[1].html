@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>น้ำผึ้งแท้ ส่งตรงจากสวน</title>
+<style>
+:root{--y:#e8a317;--d:#3b2a10;--bg:#fff8e7}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,"Noto Sans Thai",sans-serif;color:var(--d);background:var(--bg)}
+header{text-align:center;padding:56px 16px;background:linear-gradient(135deg,#f6c445,#e8a317)}
+header h1{margin:0 0 8px;font-size:2.2rem}header a{display:inline-block;margin-top:16px;background:var(--d);color:#fff;padding:12px 28px;border-radius:30px;text-decoration:none}
+section{max-width:900px;margin:auto;padding:32px 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+.card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 8px #0002;text-align:center}
+.card img{width:100%;height:200px;object-fit:cover;border-radius:12px;background:#f3d27a}
+.price{font-size:1.4rem;font-weight:700;color:#b47400}
+input,textarea,button{font:inherit;padding:10px;border-radius:8px;border:1px solid #ccc;width:100%;margin:6px 0}
+.q{width:70px;text-align:center}button{background:var(--y);border:0;font-weight:700;cursor:pointer}
+#msg{font-weight:700}footer{text-align:center;padding:24px;font-size:.9rem}
+</style></head><body>
+<header><h1>🍯 น้ำผึ้งแท้ 100%</h1><p>เก็บจากสวนโดยตรง ไม่ผสมน้ำเชื่อม ส่งทั่วไทย</p><a href="#buy">สั่งซื้อเลย</a></header>
+<section><h2>เหตุผลที่ควรเลือกเรา</h2><div class="grid">
+<div class="card">🌼 หวานธรรมชาติ</div><div class="card">🚚 แพ็คแน่นหนา ส่งไว</div><div class="card">✅ ตรวจคุณภาพทุกล็อต</div></div></section>
+<section id="buy"><h2>สินค้า</h2><div class="grid" id="products"></div>
+<h2>ข้อมูลจัดส่ง</h2>
+<form id="f"><input id="name" placeholder="ชื่อ-นามสกุล" required>
+<input id="phone" placeholder="เบอร์โทร" pattern="[0-9]{9,10}" required>
+<textarea id="addr" rows="3" placeholder="ที่อยู่จัดส่ง (บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์)" required></textarea>
+<p>รวมทั้งหมด: <b id="total">0</b> บาท</p><button>ยืนยันสั่งซื้อ</button><p id="msg"></p></form></section>
+<footer>© ร้านน้ำผึ้งของนักศึกษา</footer>
+<script>
+// ★ วาง URL ของ Google Apps Script (Web app) ตรงนี้
+const API="PASTE_APPS_SCRIPT_URL_HERE";
+const P=[{sku:"HNY-WILD-500",name:"น้ำผึ้งดอกไม้ป่า 500 ml",price:250,img:"images/wildflower.jpg"},
+{sku:"HNY-LONG-250",name:"น้ำผึ้งดอกลำไย 250 ml",price:180,img:"images/longan.jpg"}];
+const q={};const $=id=>document.getElementById(id);
+$("products").innerHTML=P.map(p=>`<div class="card"><img src="${p.img}" alt="${p.name}"><h3>${p.name}</h3>
+<div class="price">${p.price} บาท</div><small>SKU: ${p.sku}</small><br>
+จำนวน <input class="q" type="number" min="0" value="0" data-s="${p.sku}"></div>`).join("");
+document.querySelectorAll(".q").forEach(i=>i.oninput=()=>{q[i.dataset.s]=+i.value||0;
+$("total").textContent=P.reduce((t,p)=>t+p.price*(q[p.sku]||0),0)});
+$("f").onsubmit=async e=>{e.preventDefault();
+const items=P.filter(p=>q[p.sku]>0).map(p=>({sku:p.sku,name:p.name,qty:q[p.sku],price:p.price}));
+if(!items.length){$("msg").textContent="กรุณาเลือกสินค้าอย่างน้อย 1 รายการ";return}
+const d={name:$("name").value,phone:$("phone").value,address:$("addr").value,items,total:+$("total").textContent};
+try{await fetch(API,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify(d)});
+$("msg").textContent="✅ สั่งซื้อสำเร็จ! เราจะติดต่อกลับเร็วๆ นี้";$("f").reset()}
+catch(_){$("msg").textContent="เกิดข้อผิดพลาด ลองใหม่อีกครั้ง"}};
+</script></body></html>

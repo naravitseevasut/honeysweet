@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ใบหยิบสินค้า & ใบจ่าหน้าพัสดุ</title>
+<style>
+body{font-family:system-ui,"Noto Sans Thai",sans-serif;margin:16px}
+table{border-collapse:collapse;margin-bottom:20px}td,th{border:1px solid #888;padding:6px 12px}
+.label{border:2px dashed #000;padding:14px;margin:12px 0;width:380px;page-break-inside:avoid}
+.from{font-size:.85rem;border-bottom:1px solid #000;padding-bottom:6px;margin-bottom:8px}
+@media print{.no{display:none}}
+</style></head><body>
+<h1 class="no">หยิบ / แพ็ค / จ่าหน้า</h1>
+<button class="no" onclick="print()">🖨️ พิมพ์</button>
+<h2>1) ใบหยิบสินค้า (รวมทุกออเดอร์ที่ยังไม่แพ็ค)</h2><div id="pick">กำลังโหลด...</div>
+<h2>2) ใบแพ็คและจ่าหน้า</h2><div id="labels"></div>
+<script>
+const API="PASTE_APPS_SCRIPT_URL_HERE"; // ใช้ URL เดียวกับ index.html
+const FROM="ร้านน้ำผึ้งนักศึกษา | ที่อยู่ผู้ส่ง ... | โทร 08x-xxx-xxxx";
+fetch(API).then(r=>r.json()).then(rows=>{
+const todo=rows.filter(r=>r.status!=="packed");const tot={};
+todo.forEach(r=>JSON.parse(r.items).forEach(i=>tot[i.sku+"|"+i.name]=(tot[i.sku+"|"+i.name]||0)+i.qty));
+pick.innerHTML="<table><tr><th>SKU</th><th>สินค้า</th><th>จำนวนรวม</th></tr>"+
+Object.entries(tot).map(([k,v])=>{const[s,n]=k.split("|");return`<tr><td>${s}</td><td>${n}</td><td>${v}</td></tr>`}).join("")+"</table>";
+labels.innerHTML=todo.map(r=>`<div class="label"><div class="from">ผู้ส่ง: ${FROM}</div>
+<b>ออเดอร์ ${r.orderId}</b><br>ผู้รับ: <b>${r.name}</b> โทร ${r.phone}<br>${r.address}<hr>
+${JSON.parse(r.items).map(i=>`☐ ${i.sku} × ${i.qty}`).join("<br>")}<br>ยอดรวม ${r.total} บาท</div>`).join("")||"ไม่มีออเดอร์ค้าง";
+});
+</script></body></html>
